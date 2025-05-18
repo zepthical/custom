@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "custom bloxspin 0.2",
+   Name = "custom bloxspin 0.3",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "bloxspin",
    LoadingSubtitle = "by zepthical",
@@ -268,5 +268,39 @@ local ToggleESP = MainTab:CreateToggle({
        end end)
    end,
 })
+
+local SecondTab = Window:CreateTab("Infinite", "rewind")
+
+local Section = SecondTab:CreateSection("Infinite")
+
+_G.stamina = false
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function infstamina()
+    ReplicatedStorage.Remotes.Send:FireServer(9, "replicate_stamina_bar_1", 99999999999)
+end
+
+local Toggle = SecondTab:CreateToggle({
+   Name = "Infinite Stamina",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        pcall(function()
+        _G.stamina = Value
+
+        while _G.stamina do task.wait()
+            infstamina()
+        end
+
+        end)
+   end,
+})
+
+--local MiscTab = Window:CreateTab("Misc", "hexagon")
+
+--local Section = MiscTab:CreateSection("Misc")
+
+
 
 Rayfield:LoadConfiguration()
