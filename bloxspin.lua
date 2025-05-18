@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "custom bloxspin",
+   Name = "custom bloxspin 0.1",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "bloxspin",
    LoadingSubtitle = "by zepthical",
@@ -34,7 +34,7 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local MainTab = Window:CreateTab("aimbot", "bow-arrow")
+local MainTab = Window:CreateTab("aimbot", "crosshair")
 
 local Section = MainTab:CreateSection("aimbot")
 
@@ -97,7 +97,9 @@ local Slider = MainTab:CreateSlider({
    CurrentValue = 100,
    Flag = "AimbotDistance",
    Callback = function(Value)
+       pcall(function()
        maxAimDistance = Value -- update the aimbot range dynamically
+       end)
    end,
 })
 
@@ -109,6 +111,7 @@ local KeybindAimbot = MainTab:CreateKeybind({
    HoldToInteract = false,
    Flag = "AimbotToggleKeybind",
    Callback = function()
+        pcall(function()
        aimbotRunning = not aimbotRunning -- toggle on/off
        
        if aimbotRunning then
@@ -135,6 +138,7 @@ local KeybindAimbot = MainTab:CreateKeybind({
        else
            distanceLabel.Text = "Distance: N/A"
        end
+       end)
    end,
 })
 
@@ -145,7 +149,8 @@ local Input = MainTab:CreateInput({
    RemoveTextAfterFocusLost = false,
    Flag = "inputaimbot",
    Callback = function(Text)
-        KeybindAimbot:Set(Text)
+        pcall(function()
+        KeybindAimbot:Set(Text) end)
    end,
 })
 
@@ -155,7 +160,6 @@ local espEnabled = false
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local camera = workspace.CurrentCamera
 local localPlayer = Players.LocalPlayer
 
 local espObjects = {}
@@ -268,12 +272,13 @@ local ToggleESP = MainTab:CreateToggle({
    CurrentValue = false,
    Flag = "ESPFullToggle",
    Callback = function(Value)
+        pcall(function()
        espEnabled = Value
        if not Value then
            for _, player in pairs(Players:GetPlayers()) do
                removeESP(player)
            end
-       end
+       end end)
    end,
 })
 
