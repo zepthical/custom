@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "custom bloxspin 0.4",
+   Name = "custom bloxspin 0.5",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "bloxspin",
    LoadingSubtitle = "by zepthical",
@@ -39,20 +39,6 @@ local MainTab = Window:CreateTab("aimbot", "crosshair")
 local Section = MainTab:CreateSection("aimbot")
 
 local maxAimDistance = 100
-
-local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-gui.Name = "AimbotDistanceGUI"
-
-local distanceLabel = Instance.new("TextLabel", gui)
-distanceLabel.Size = UDim2.new(0, 200, 0, 30)
-distanceLabel.Position = UDim2.new(0.5, -100, 0, 50) -- Centered near the top
-distanceLabel.BackgroundTransparency = 0.5
-distanceLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-distanceLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-distanceLabel.TextScaled = true
-distanceLabel.Text = "ระยะ: N/A"
-
 
 local UIS = game:GetService("UserInputService")
 local camera = game.Workspace.CurrentCamera
@@ -121,21 +107,17 @@ local KeybindAimbot = MainTab:CreateKeybind({
 
                    if target and target.Character and target.Character:FindFirstChild("Head") and distance <= maxAimDistance then
                        -- Update distance label
-                       distanceLabel.Text = "Distance: " .. math.floor(distance) .. " studs"
-
                        -- Tween camera
                        local tween = TS:Create(camera, tweenInfo, {
                            CFrame = CFrame.new(camera.CFrame.Position, target.Character.Head.Position)
                        })
                        tween:Play()
                    else
-                       distanceLabel.Text = "Distance: Out of range"
                    end
                    task.wait()
                end
            end)
        else
-           distanceLabel.Text = "Distance: N/A"
        end
        end)
    end,
@@ -148,8 +130,7 @@ local Input = MainTab:CreateInput({
    RemoveTextAfterFocusLost = false,
    Flag = "Input1",
    Callback = function(Text)
-        pcall(function()
-        KeybindAimbot:Set(Text) end)
+        KeybindAimbot:Set(Text)
    end,
 })
 
