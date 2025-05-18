@@ -271,7 +271,9 @@ _G.stamina = false
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local function infstamina()
-    ReplicatedStorage.Remotes.Send:FireServer(9, "replicate_stamina_bar_1", 9999999999)
+    for i = 1, 20 do
+        ReplicatedStorage.Remotes.Send:FireServer(i, "replicate_stamina_bar_1", 99999999999)
+    end
 end
 
 local Toggle = SecondTab:CreateToggle({
