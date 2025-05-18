@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "custom bloxspin 0.1",
+   Name = "custom bloxspin",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "bloxspin",
    LoadingSubtitle = "by zepthical",
@@ -41,9 +41,8 @@ local Section = MainTab:CreateSection("aimbot")
 local maxAimDistance = 100
 
 local player = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+local gui = Instance.new("ScreenGui", player:WaitForChild("CoreGui"))
 gui.Name = "AimbotDistanceGUI"
-gui.Enabled = true
 
 local distanceLabel = Instance.new("TextLabel", gui)
 distanceLabel.Size = UDim2.new(0, 200, 0, 30)
@@ -139,18 +138,6 @@ local KeybindAimbot = MainTab:CreateKeybind({
            distanceLabel.Text = "Distance: N/A"
        end
        end)
-   end,
-})
-
-local Input = MainTab:CreateInput({
-   Name = "ปุ่ม aimbot",
-   CurrentValue = "F",
-   PlaceholderText = "Input Placeholder",
-   RemoveTextAfterFocusLost = false,
-   Flag = "inputaimbot",
-   Callback = function(Text)
-        pcall(function()
-        KeybindAimbot:Set(Text) end)
    end,
 })
 
