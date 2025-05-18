@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "custom bloxspin 0.6",
+   Name = "custom bloxspin",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "bloxspin",
    LoadingSubtitle = "by zepthical",
@@ -124,7 +124,7 @@ local KeybindAimbot = MainTab:CreateKeybind({
 })
 
 local Input = MainTab:CreateInput({
-   Name = "ปุ่ม aimbot",
+   Name = "ปุ่ม aimbot ( ก็เหมือนกับ aimbot นั้นแหละ )",
    CurrentValue = "F",
    PlaceholderText = "Input Placeholder",
    RemoveTextAfterFocusLost = false,
@@ -262,10 +262,143 @@ local ToggleESP = MainTab:CreateToggle({
    end,
 })
 
---local MiscTab = Window:CreateTab("Misc", "hexagon")
+local SecondTab = Window:CreateTab("Infinite", "rewind")
 
---local Section = MiscTab:CreateSection("Misc")
+local Section = SecondTab:CreateSection("Infinite")
 
+_G.stamina = false
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function infstamina()
+    ReplicatedStorage.Remotes.Send:FireServer(9, "replicate_stamina_bar_1", 9999999999)
+end
+
+local Toggle = SecondTab:CreateToggle({
+   Name = "Infinite Stamina",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        pcall(function()
+        _G.stamina = Value
+
+        while _G.stamina do task.wait()
+            infstamina()
+        end
+
+        end)
+   end,
+})
+
+local MiscTab = Window:CreateTab("Misc", "hexagon")
+
+local Section = MiscTab:CreateSection("Misc")
+
+local function fly()
+    local player = Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    local flying = false
+    local speed = 50
+    local direction = Vector3.zero
+
+    -- Fly body movers
+    local bodyGyro = Instance.new("BodyGyro")
+    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+    bodyGyro.P = 9e4
+    bodyGyro.D = 500
+    bodyGyro.CFrame = hrp.CFrame
+
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+    bodyVelocity.P = 1e4
+    bodyVelocity.Velocity = Vector3.zero
+
+    -- Movement keys
+    local keysDown = {
+        W = false,
+        A = false,
+        S = false,
+        D = false
+    }
+
+    -- Toggle flying
+    local function toggleFly()
+        flying = not flying
+
+        if flying then
+            bodyGyro.Parent = hrp
+            bodyVelocity.Parent = hrp
+        else
+            bodyGyro.Parent = nil
+            bodyVelocity.Parent = nil
+        end
+    end
+
+    -- Handle key input
+    UIS.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+
+        if input.KeyCode == Enum.KeyCode.E then
+            if char.Humanoid.Health == 0 then
+                toggleFly()
+            elseif input.KeyCode == Enum.KeyCode.W then
+                keysDown.W = true
+            elseif input.KeyCode == Enum.KeyCode.A then
+                keysDown.A = true
+            elseif input.KeyCode == Enum.KeyCode.S then
+                keysDown.S = true
+            elseif input.KeyCode == Enum.KeyCode.D then
+                keysDown.D = true
+            end
+        end
+    end)
+
+    UIS.InputEnded:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.W then
+            keysDown.W = false
+        elseif input.KeyCode == Enum.KeyCode.A then
+            keysDown.A = false
+        elseif input.KeyCode == Enum.KeyCode.S then
+            keysDown.S = false
+        elseif input.KeyCode == Enum.KeyCode.D then
+            keysDown.D = false
+        end
+    end)
+
+    -- Update loop
+    RunService.RenderStepped:Connect(function()
+        if flying then
+            local cam = workspace.CurrentCamera
+            local moveVec = Vector3.zero
+
+            if keysDown.W then moveVec += cam.CFrame.LookVector end
+            if keysDown.S then moveVec -= cam.CFrame.LookVector end
+            if keysDown.A then moveVec -= cam.CFrame.RightVector end
+            if keysDown.D then moveVec += cam.CFrame.RightVector end
+
+            bodyVelocity.Velocity = moveVec.Unit * speed
+            bodyGyro.CFrame = cam.CFrame
+        end
+    end)
+end
+
+_G.fly = false
+
+local ToggleFLY = MiscTab:CreateToggle({
+   Name = "Fly ( ตอนตาย )",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+        pcall(function()
+        _G.fly = Value
+
+        if _G.fly == true then
+            fly()
+        end
+        end)
+   end,
+})
 
 Rayfield:LoadConfiguration()
