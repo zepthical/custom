@@ -9,7 +9,7 @@ _G.fastmethod = true
 _G.tweenmethod = false
 local keybind = Enum.KeyCode.T -- You can change this to your preferred key
 
-function getClosest()
+local function getClosest()
     local closestDistance = math.huge
     local closestPlayer = nil
     for _, player in ipairs(Players:GetPlayers()) do
@@ -24,7 +24,7 @@ function getClosest()
     return closestPlayer
 end
 
-function tweenMethod()
+local function tweenMethod()
     local target = getClosest()
     if target and target.Character and target.Character:FindFirstChild("Head") then
         local tween = TS:Create(camera, tweenInfo, {CFrame = CFrame.new(camera.CFrame.Position, target.Character.Head.Position)})
@@ -32,7 +32,7 @@ function tweenMethod()
     end
 end
 
-function fastMethod()
+local function fastMethod()
     local target = getClosest()
     if target and target.Character and target.Character:FindFirstChild("Head") then
         camera.CFrame = CFrame.new(camera.CFrame.Position, target.Character.Head.Position)
@@ -84,7 +84,7 @@ end
 
 
 
-
+pcall(function()
 local espEnabled = false
 
 local Players = game:GetService("Players")
@@ -197,7 +197,7 @@ end)
 Players.PlayerRemoving:Connect(function(player)
 	removeESP(player)
 end)
-
+end)
 
 
 
@@ -464,7 +464,7 @@ local InfiniteSta = InfTab:CreateToggle({
 
 local FlyToggle = MiscTab:CreateButton({
    Name = "FPS BOOST",
-   Callback = function()
+   Callback = function(Value)
         pcall(function()
 
 
