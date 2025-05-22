@@ -7,7 +7,7 @@ local tweenInfo = TweenInfo.new(0.25)
 _G.aim = false
 _G.fastmethod = true
 _G.tweenmethod = false
-local keybind = Enum.KeyCode.Q -- You can change this to your preferred key
+local keybind = Enum.KeyCode.T -- You can change this to your preferred key
 
 function getClosest()
     local closestDistance = math.huge
