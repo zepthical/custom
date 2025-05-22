@@ -1,66 +1,70 @@
-local UIS = game:GetService("UserInputService")
-local camera = game.Workspace.CurrentCamera
+local camera = workspace.CurrentCamera
 local TS = game:GetService("TweenService")
-local tweenInfo = TweenInfo.new(0.25)
 local Players = game:GetService("Players")
+local tweenInfo = TweenInfo.new(0.25)
 
-function getClosest()
-	local closestDistance = math.huge
-	local closestPlayer = nil
-	for i, v in pairs(game.Players:GetChildren()) do
-		if v ~= game.Players.LocalPlayer and v.Team ~= game.Players.LocalPlayer.Team then
-			local distance = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude
-			if distance < closestDistance then
-				closestDistance = distance
-				closestPlayer = v
-			end
-		end
-	end
-	return closestPlayer
-end 
-
+-- SETTINGS
 _G.aim = false
 _G.fastmethod = true
 _G.tweenmethod = false
+local keybind = Enum.KeyCode.Q -- You can change this to your preferred key
 
-local function tweenMethod()
-	if _G.tweenmethod then
-		local tween = TS:Create(camera, tweenInfo, {CFrame = CFrame.new(camera.CFrame.Position, getClosest().Character.Head.Position)})
-		tween:Play()
-		if _G.aim == false then tween:Cancel();return end
-	end
+function getClosest()
+    local closestDistance = math.huge
+    local closestPlayer = nil
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (Players.LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+            if distance < closestDistance then
+                closestDistance = distance
+                closestPlayer = player
+            end
+        end
+    end
+    return closestPlayer
 end
 
-local function fastMethod()
-    if _G.fastmethod then
-	    camera.CFrame = CFrame.new(camera.CFrame.Position, getClosest().Character.Head.Position)
-	    if _G.aim == false then return end
+function tweenMethod()
+    local target = getClosest()
+    if target and target.Character and target.Character:FindFirstChild("Head") then
+        local tween = TS:Create(camera, tweenInfo, {CFrame = CFrame.new(camera.CFrame.Position, target.Character.Head.Position)})
+        tween:Play()
     end
 end
 
+function fastMethod()
+    local target = getClosest()
+    if target and target.Character and target.Character:FindFirstChild("Head") then
+        camera.CFrame = CFrame.new(camera.CFrame.Position, target.Character.Head.Position)
+    end
+end
+
+-- Input System
 local function aimbotSystem(keybind)
-    UIS.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.keybind then
+    UIS.InputBegan:Connect(function(input, processed)
+        if not processed and input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode[keybind] then
             _G.aim = true
-
-            if _G.tweenMethod then
-                while task.wait() do
-                    tweenMethod()
-                end 
-            end
-
-            if _G.fastMethod then
-                fastMethod()
-            end
+            task.spawn(function()
+                while _G.aim do
+                    if _G.tweenmethod then
+                        tweenMethod()
+                    elseif _G.fastmethod then
+                        fastMethod()
+                    end
+                    task.wait()
+                end
+            end)
         end
     end)
 
     UIS.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.keybind then
+        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode[keybind] then
             _G.aim = false
         end
     end)
 end
+
+
 
 local function getAllCharacter()
 	for _, v in ipairs(Players:GetChildren()) do
@@ -375,33 +379,37 @@ local MiscTab = Window:CreateTab("Misc", 4483362458)
 
 local Section = MainTab:CreateSection("Aimbot")
 
-local aimbotToggle = MainTab:CreateToggle({
-   Name = "Aimbot",
-   CurrentValue = true,
-   Flag = "togaimb",
-   Callback = function(Value)
-        pcall(function()
-            _G.aim = Value
+_G.aim = false
+_G.tweenmethod = false
+_G.fastmethod = true
 
-            if _G.aim then
-                aimbotSystem()
-            end
-        end)
-   end,
-})
+local running = false
 
 local aimbotkeybind = MainTab:CreateKeybind({
-   Name = "Aimbot Keybind",
-   CurrentKeybind = "R",
-   HoldToInteract = false,
-   Flag = "keybaimb", 
-   Callback = function(Keybind)
+    Name = "Aimbot Keybind",
+    CurrentKeybind = "T",
+    HoldToInteract = false,
+    Flag = "keybaimb",
+    Callback = function()
         pcall(function()
-            if _G.aim == true then
-                aimbotSystem(aimbotkeybind.CurrentKeybind)
+            _G.aim = not _G.aim
+
+            if _G.aim and not running then
+                running = true
+                task.spawn(function()
+                    while _G.aim do
+                        if _G.tweenmethod then
+                            tweenMethod()
+                        elseif _G.fastmethod then
+                            fastMethod()
+                        end
+                        task.wait()
+                    end
+                    running = false
+                end)
             end
         end)
-   end,
+    end,
 })
 
 local amethod = MainTab:CreateDropdown({
@@ -412,14 +420,16 @@ local amethod = MainTab:CreateDropdown({
    Flag = "dropmet", 
    Callback = function(Options)
         pcall(function()
-            if Options == Instant then
+            if Options == "Instant" then
                 _G.fastmethod = true
                 _G.tweenmethod = false
-            elseif Options == Tween then
+            elseif Options == "Tween" then
                 _G.fastmethod = false
                 _G.tweenmethod = true
             end
-        end)
+
+            end)
+        end
    end,
 })
 
@@ -427,7 +437,7 @@ local Divider1 = MainTab:CreateDivider()
 
 local ESPToggle = MainTab:CreateToggle({
    Name = "ESP [Tracer, Boxes, etc.]",
-   CurrentValue = true,
+   CurrentValue = false,
    Flag = "togesp", 
    Callback = function(Value)
         espEnabled = Value
@@ -437,8 +447,8 @@ local ESPToggle = MainTab:CreateToggle({
 local infsta = false
 
 local InfiniteSta = InfTab:CreateToggle({
-   Name = "Infinite Stamina",
-   CurrentValue = true,
+   Name = "Infinite Stamina (DETECTED)",
+   CurrentValue = false,
    Flag = "infstam",
    Callback = function(Value)
         pcall(function()
@@ -452,15 +462,49 @@ local InfiniteSta = InfTab:CreateToggle({
    end,
 })
 
-local FlyToggle = MiscTab:CreateToggle({
-   Name = "Fly (While dead)",
-   CurrentValue = false,
-   Flag = "togfly", 
-   Callback = function(Value)
+local FlyToggle = MiscTab:CreateButton({
+   Name = "FPS BOOST",
+   Callback = function()
         pcall(function()
-            FLYING = Value
 
-            flytog()
+
+repeat task.wait() until game:IsLoaded();
+
+getgenv().boostFPS = true
+
+local vim = game:GetService("VirtualInputManager")
+setfpscap(5000)
+
+game.DescendantAdded:Connect(function(d)
+  if d.Name == "MainView" and d.Parent.Name == "DevConsoleUI" and boostFPS then
+      task.wait()
+      local screen = d.Parent.Parent.Parent
+      screen.Enabled = false;
+  end
+end)
+
+vim:SendKeyEvent(true, "F9", 0, game)    
+wait()
+vim:SendKeyEvent(false, "F9", 0, game)  
+
+while true do
+  task.wait()
+  if not boostFPS then
+      continue;
+  end
+ 
+
+  warn("")
+ 
+  if not game:GetService("CoreGui"):FindFirstChild("DevConsoleUI", true):FindFirstChild("MainView") then
+       vim:SendKeyEvent(true, "F9", 0, game)    
+        wait()
+        vim:SendKeyEvent(false, "F9", 0, game)  
+        continue
+    end
+end
+
+
         end)
    end,
 })
